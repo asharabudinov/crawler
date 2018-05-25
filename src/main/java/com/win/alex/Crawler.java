@@ -12,11 +12,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.LinkedList;
 
 public class Crawler {
 
@@ -26,7 +26,7 @@ public class Crawler {
     private final String VALUE = "make-everything-ok-button";
 
 
-    public void lookup(String[] args) {
+    public Optional<String> lookup(String[] args) {
         File originFile = new File(args[0]);
         File targetFile = new File(args[1]);
 
@@ -34,10 +34,13 @@ public class Crawler {
 
         Optional<Element> originElement = findElementByAttributes(attributes, originFile);
 
-        originElement.ifPresent(toLookFor ->  {
+        Optional<String> result = originElement.map(toLookFor -> {
             Optional<Element> diffElement = findElementByAttributes(toLookFor.attributes(), targetFile);
-            diffElement.ifPresent(target -> log.info(XPathParser.buildXPathString(target)));
+            return diffElement.map(XPathParser::buildXPathString).orElseThrow(() -> new RuntimeException("Element not found"));
         });
+        result.ifPresent(xpath -> log.info("XPath to element like {} from origin, in {}: \n {}", attributes.asList(),
+                args[1].substring(args[1].lastIndexOf("/") + 1, args[1].length()), xpath));
+        return result;
     }
 
     /**

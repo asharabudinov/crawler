@@ -1,7 +1,7 @@
 package com.win.alex;
 
-import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Element;
+
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -20,7 +20,7 @@ public class XPathParser {
     private static void appendElementParent(Element current, StringBuilder builder) {
         Element parent = current.parent();
         if (parent != null) {
-            String childIndexPrefix = getChildIndexPrefix(parent, current.attributes());
+            String childIndexPrefix = getChildIndexPrefix(parent, current);
             builder.insert(0, childIndexPrefix)
                     .insert(0, current.tag().getName())
                     .insert(0, " > ");
@@ -28,15 +28,15 @@ public class XPathParser {
         }
     }
 
-    private static String getChildIndexPrefix(Element element, Attributes attributes) {
+    private static String getChildIndexPrefix(Element parent, Element current) {
         AtomicInteger index = new AtomicInteger();
 
-        element.children().stream()
-                .filter(node -> !node.nodeName().equals("#text"))
+        parent.children().stream()
+                .filter(node -> node.tagName().equals(current.tagName()))
                 .collect(Collectors.toList()) // filtered TextNodes
                     .stream()
                     .filter(child -> {
-                        if (child.attributes().equals(attributes)) {
+                        if (child.attributes().equals(current.attributes()) && child.childNodes().equals(current.childNodes())) {
                             return true;
                         }
                         index.incrementAndGet(); // if attributes isn't equals increment index
