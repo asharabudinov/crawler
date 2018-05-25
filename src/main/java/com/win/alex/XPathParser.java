@@ -12,19 +12,19 @@ public class XPathParser {
      */
     public static String buildXPathString(Element element) {
         StringBuilder builder = new StringBuilder();
-        appendElementParent(element, builder);
+        recursivelyAppendParentNodes(element, builder);
         builder.replace(0, 3, "");
         return builder.toString();
     }
 
-    private static void appendElementParent(Element current, StringBuilder builder) {
+    private static void recursivelyAppendParentNodes(Element current, StringBuilder builder) {
         Element parent = current.parent();
         if (parent != null) {
             String childIndexPrefix = getChildIndexPrefix(parent, current);
             builder.insert(0, childIndexPrefix)
                     .insert(0, current.tag().getName())
                     .insert(0, " > ");
-            appendElementParent(parent, builder);
+            recursivelyAppendParentNodes(parent, builder);
         }
     }
 
